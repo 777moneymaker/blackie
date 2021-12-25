@@ -1,0 +1,16 @@
+[package]
+name = "blackie"
+version = "0.1.0"
+authors = ["Miłosz Chodkowski <b@example.com>"]
+edition = "2021"
+description = "Very simple CLI app for testing the & for true black pixels in an image"
+readme = "README.md"
+license = "GPLv3"
+repository = "https://github.com/777moneymaker/blackie.git"
+homepage = "https://github.com/777moneymaker/blackie"
+
+[dependencies]
+clap = "~2.27.0"
+image = "*"
+# termion = "*"
+customs = { path = "customs/" }
