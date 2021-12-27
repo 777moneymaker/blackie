@@ -5,12 +5,13 @@ authors = ["Miłosz Chodkowski <b@example.com>"]
 edition = "2021"
 description = "Very simple CLI app for testing the & for true black pixels in an image"
 readme = "README.md"
-license = "GPLv3"
+license = "GPL-3.0-only"
 repository = "https://github.com/777moneymaker/blackie.git"
 homepage = "https://github.com/777moneymaker/blackie"
+keywords = ["black", "graphics", "image", "pixels", "true-black"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 clap = "~2.27.0"
 image = "*"
-# termion = "*"
-customs = { path = "customs/" }
+colored = "2.0.0"

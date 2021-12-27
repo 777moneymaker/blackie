@@ -1,10 +1,14 @@
 use clap::{App, Arg, ArgMatches, Values};
-use image::{io::Reader as ImgReader, DynamicImage, ImageOutputFormat, ImageResult};
+use colored::Colorize;
+use image::{io::Reader as ImgReader, DynamicImage, ImageResult};
+use std::path::Path;
+use std::result::Result;
 
-use customs::extensions;
-use customs::pixel::{self, PixelStatus};
+// Local files
+mod pixel;
+pub use crate::pixel::{PixelStatus};
 
-fn main() {
+fn main() -> Result<(), &'static str> {
     // Args object
     let args: ArgMatches = App::new("Name: Blackie")
         .version("Version: 0.1.0")
@@ -21,42 +25,44 @@ fn main() {
     let pairs: Values = match args.values_of("files") {
         Some(f) => f,
         None => {
-            todo!("No files provided needs implementation!");
+            return Err("No files provided!");
         }
     };
 
     // Retrieve all valid filenames
     let (files, exts): (Vec<&str>, Vec<&str>) = pairs
-        .filter(|&x| extensions::ends_with_custom(x))
-        .map(|x| extensions::get_suffix(x))
+        .map(|x| {
+            let p = Path::new(x);
+            (
+                p.to_str().unwrap(),
+                p.extension().unwrap().to_str().unwrap(),
+            )
+        })
+        .filter(|x| vec!["jpg", "jpeg", "png"].contains(&x.1))
         .unzip();
 
-    if files.len() == 0 || exts.len() == 0 {
-        panic!("No valid files provided!");
+    if files.len() == 0 && exts.len() == 0 {
+        return Err("No valid files provided!");
     }
 
-    for (file, ext) in files.iter().zip(exts) {
+    for (file, _) in files.iter().zip(exts) {
         let myimg: ImageResult<DynamicImage> = match ImgReader::open(file) {
             Ok(img) => img.decode(),
-            Err(_) => todo!("Failed image opening needs implementation"),
-        };
-
-        let format: ImageOutputFormat = match ext {
-            ".jpg" | ".jpeg" => ImageOutputFormat::Jpeg(0),
-            ".png" => ImageOutputFormat::Png,
-            _ => {
-                todo!("Invalid image format need implementation.")
+            Err(e) => {
+                eprintln!("Failed to read file {}. Error: {}", file, e);
+                continue;
             }
         };
 
-        let mut tru_count: usize = 0;
-        let mut all_count: usize = 0;
-
         // Decode this fucker.
         // Srsly this is my first rust app and I'm writing this at 2am...
-        let myimg = myimg.expect("Image decoding was unsuccesful.").into_rgb8();
-        for px in myimg.pixels()
-        {
+        let myimg = myimg
+            .expect(format!("Image decoding was unsuccesful. File {}", file).as_str())
+            .into_rgb8();
+
+        let mut tru_count: usize = 0;
+        let mut all_count: usize = 0;
+        for px in myimg.pixels() {
             match pixel::is_tru_blvck(px[0], px[1], px[2]) {
                 PixelStatus::BLVCK => {
                     tru_count += 1;
@@ -68,9 +74,7 @@ fn main() {
             }
         }
         let percent = (tru_count as f32 / all_count as f32) * 100.0;
-        println!(
-            "Percent of trv black pixels for file {} = {:.2}%",
-            file, percent
-        );
+        println!("{}: {:.4}%", file.green(), format!("{}", percent).red());
     }
+    Ok(())
 }
