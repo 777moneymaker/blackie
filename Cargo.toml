@@ -1,6 +1,6 @@
 [package]
 name = "blackie"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Miłosz Chodkowski <b@example.com>"]
 edition = "2021"
 description = "Very simple CLI app for testing the & for true black pixels in an image"
