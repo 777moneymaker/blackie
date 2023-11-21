@@ -1,5 +1,6 @@
 use clap::{App, Arg, ArgMatches, Values};
 use colored::Colorize;
+use image::GenericImageView;
 use image::io::Reader as ImgReader;
 use std::path::Path;
 use std::result::Result;
@@ -63,11 +64,16 @@ fn main() -> Result<(), &'static str> {
             }
         };
 
+
+
         // Decode this fucker.
         // Srsly this is my first rust app and I'm writing this at 2am...
         let myimg = myimg
-            .expect(format!("Image decoding was unsuccesful. File {}", file).as_str())
-            .into_rgb8();
+            .expect(format!("Image decoding was unsuccesful. File {}", file).as_str());
+        
+        
+        let (width, height) = (myimg.width(), myimg.height());
+        let myimg = myimg.into_rgb8();
 
         let mut tru_count: usize = 0;
         let mut all_count: usize = 0;
@@ -76,7 +82,7 @@ fn main() -> Result<(), &'static str> {
             all_count += 1;
         }
         let percent = (tru_count as f32 / all_count as f32) * 100.0;
-        println!("{}: {:.4}%", file.green(), format!("{}", percent).red());
+        println!("{} {}: {:.4}", file.green(), format!("({:3.0}px x {:3.0}px)", width, height).blue(), format!("{}%", percent).red());
     }
     Ok(())
 }
